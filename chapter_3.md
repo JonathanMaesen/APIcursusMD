@@ -67,19 +67,19 @@ Route constraints enforce a specific data type or format on a route parameter. I
 
 ### 3. Binding Source Attributes
 
-Model binding maps data from an HTTP request to your action method's parameters. Binding source attributes tell the framework *where* to find the data.
+Model binding maps data from an HTTP request to your action method's parameters. Binding source attributes tell the framework where to find the data.
 
-| Attribute          | Binds From...                               | Default For...                                      |
-|--------------------|---------------------------------------------|-----------------------------------------------------|
-| **`[FromRoute]`**  | The URL path segment.                       | Simple types (`int`, `string`) matching a route parameter. |
-| **`[FromQuery]`**  | The URL query string.                       | Simple types not found in the route.                |
-| **`[FromBody]`**   | The request body (usually JSON/XML).        | Complex types (`Product`, `UserDto`).               |
-| **`[FromHeader]`** | An HTTP request header.                     | Must be specified explicitly.                       |
-| **`[FromServices]`**| The Dependency Injection container.         | Must be specified explicitly.                       |
+| Attribute | Binds From... | Default For... |
+| :--- | :--- | :--- |
+| `[FromRoute]` | The URL path segment. | Simple types (`int`, `string`) matching a route parameter. |
+| `[FromQuery]` | The URL query string. | Simple types not found in the route. |
+| `[FromBody]` | The request body (usually JSON/XML). | Complex types (`Product`, `UserDto`). |
+| `[FromHeader]` | An HTTP request header. | Must be specified explicitly. |
+| `[FromServices]` | The Dependency Injection container. | Must be specified explicitly. |
 
-> **Example:** An action method using multiple binding sources.
->
-> ```csharp
+Example: An action method using multiple binding sources.
+
+```csharp
 // Request: PUT /api/products/123?notify=true
 // Headers: "X-Api-Version": "2.0"
 // Body: { "name": "New Name", "price": 150 }
@@ -96,7 +96,7 @@ public IActionResult UpdateProduct(
     // apiVersion = "2.0"
     // ...
 }
-> ```
+```
 
 ---
 
