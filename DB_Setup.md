@@ -146,12 +146,24 @@ dotnet ef database update --project DataLayer --startup-project MyApi
 
 ---
 
-## VI. Setting up PostgreSQL with Docker
+## VI. Setting Up
 
 To quickly spin up a PostgreSQL database for development, you can use Docker.
 
-### 1. Start the Container
+### 1. Start the PostgreSQL Container
+
+Run the following command to start a PostgreSQL instance in a Docker container:
 
 ```bash
 docker run --name postgres-db -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
+```
+
+### 2. Connection String
+
+Use the following connection string in your `appsettings.json` or configuration to connect to this container:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Host=localhost;Port=5432;Database=MyDb;Username=admin;Password=password;"
+}
 ```
