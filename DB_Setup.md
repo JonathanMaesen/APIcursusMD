@@ -143,3 +143,15 @@ These flags can be added to almost any command to help debug issues.
 ```bash
 dotnet ef database update --project DataLayer --startup-project MyApi
 ```
+
+---
+
+## VI. Setting up PostgreSQL with Docker
+
+To quickly spin up a PostgreSQL database for development, you can use Docker.
+
+### 1. Start the Container
+
+```bash
+docker run --name postgres-db -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
+```
