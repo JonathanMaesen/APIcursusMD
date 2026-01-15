@@ -158,7 +158,15 @@ Run the following command to start a PostgreSQL instance in a Docker container:
 docker run --name postgres-db -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
 ```
 
-### 2. Connection String
+### 2. Required NuGet Package
+
+To interact with PostgreSQL using Entity Framework Core, you need to install the following package in your project:
+
+```bash
+dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
+```
+
+### 3. Connection String
 
 Use the following connection string in your `appsettings.json` or configuration to connect to this container:
 
