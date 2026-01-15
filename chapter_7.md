@@ -68,24 +68,33 @@ This distinction is critical for performance.
 ### 4. Raw SQL Queries
 For complex scenarios like stored procedures or highly optimized queries, EF Core allows you to drop down to raw SQL.
 
-*   **`FromSql`:** The safe, recommended method for querying entities. It automatically parameterizes inputs to prevent SQL injection.
+*   **`FromSql`:** The safe, recommended method for querying **entities**. It automatically parameterizes inputs to prevent SQL injection.
+*   **`SqlQuery`:** Used for querying **scalar values** (like `int`, `string`, `Guid`) or simple unmapped types that are not entities.
 *   **`ExecuteSql`:** For executing non-query commands like `UPDATE`, `DELETE`, or calling stored procedures that don't return data.
 
 > **Example:**
 > ```csharp
-> // Safely query entities using an interpolated string
+> // 1. Querying Entities (FromSql)
 > var recentProducts = await _context.Products
 >     .FromSql($"SELECT * FROM Products WHERE CreationDate > {oneMonthAgo}")
 >     .ToListAsync();
 >
-> // Safely execute a command
+> // 2. Querying Scalars (SqlQuery)
+> // Useful for getting a list of IDs or names without the overhead of full entities.
+> var productIds = await _context.Database
+>     .SqlQuery<int>($"SELECT Id FROM Products WHERE Price > 100")
+>     .ToListAsync();
+>
+> // 3. Executing Commands (ExecuteSql)
 > await _context.Database.ExecuteSqlAsync(
 >     $"UPDATE Products SET IsActive = 0 WHERE LastStockDate < {cutoffDate}"
 > );
 > ```
 
 ### 5. Bulk Operations (EF Core 7+)
-These are highly efficient methods for updating or deleting many rows at once because they bypass the change tracker and execute a single SQL statement.
+These are highly efficient methods for updating or deleting many rows at once.
+
+**Why it matters:** In older versions of EF Core, to update 1,000 rows, you had to retrieve 1,000 entities into memory, modify them, and save them. This was slow and memory-intensive. Bulk operations allow you to modify millions of rows in a single database command without loading them into memory.
 
 *   **`ExecuteUpdateAsync`:** Updates multiple rows based on a `Where` clause.
 *   **`ExecuteDeleteAsync`:** Deletes multiple rows based on a `Where` clause.
@@ -121,6 +130,18 @@ This pattern prevents users from accidentally overwriting each other's changes.
 **The Solution (Optimistic Concurrency):**
 You add a special "concurrency token" to your entity. When EF Core saves an entity, it checks if this token has changed in the database since it was first read. If it has, it means someone else modified it, and EF Core throws a `DbUpdateConcurrencyException`.
 
+#### Types of Concurrency Tokens
+
+1.  **Native Database Tokens:**
+    *   Handled automatically by the database engine.
+    *   **Example:** SQL Server's `rowversion` (or `timestamp`) column. The database generates a new binary value every time the row is updated.
+    *   **Usage:** Use the `[Timestamp]` attribute.
+
+2.  **Application-Managed Tokens:**
+    *   Handled by your application code.
+    *   **Example:** A `Guid` or `DateTime` column (e.g., `LastUpdated`).
+    *   **Usage:** You must manually update this property (or use the `[ConcurrencyCheck]` attribute) whenever you modify the entity. This is useful for databases that don't support native row versioning (like SQLite or older MySQL versions).
+
 > **Implementation with `[Timestamp]` (SQL Server):**
 >
 > ```csharp
@@ -129,7 +150,7 @@ You add a special "concurrency token" to your entity. When EF Core saves an enti
 >     public int Id { get; set; }
 >     public string Name { get; set; }
 >
->     [Timestamp] // This attribute tells EF Core to use this for concurrency checks
+>     [Timestamp] // Maps to a native rowversion column
 >     public byte[] RowVersion { get; set; }
 > }
 > ```
